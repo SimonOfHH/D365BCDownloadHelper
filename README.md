@@ -2,6 +2,12 @@
 This little module is used to provide you with a download link for a Dynamics 365 Business Central DVD. It will do a Google search with the necessary search query and return the correct link to the DVD Zip-File from Microsoft. It'll first search for the general download-page (where you can select the different languages) and then select the correct link from the confirmation page.
 
 Works only for downloads listed in the Microsoft Download center. Business Central 15 is currently only available via Partner Source/Customer Source (afaik).
+## Remarks
+This module is used in combination with another project (link will follow when it's done). Of course I had specific requirements, but feel free to use it or ask for changes, report bugs, ... 
+
+If you know a better way to get a download link for a DVD I'd be happy when you leave a comment 😊
+
+As you might notice on the structure, etc. I'm no PowerShell-expert - but I'm trying my best. Looking forward to your feedback.
 
 ## Installation
 Install from PSGallery via
@@ -13,11 +19,21 @@ Import it into your current session
 Import-Module D365BCDownloadHelper
 ```
 ## Usage Example
-Use it like this
+Use it like this, if you only want the URL:
 ```
 Get-BusinessCentralDownloadUrl -Version 13 -CumulativeUpdate CU14 -Language W1
 === Result ===
 https://download.microsoft.com/download/9/5/4/954c190e-ecc0-4ab3-b78e-56f37ee9ec45/CU 14 Dynamics 365 Business Central W1.zip
+```
+
+If you want to download a specific version directly, use it like this: 
+```
+Receive-BusinessCentralDVD -Version 13 -CumulativeUpdate CU14 -Language W1 -DownloadDirectory "C:\Install\"
+```
+
+If you want to download a specific version and extract it as well, use it like this (not sure if I like the naming of this one):
+```
+Get-ReceiveAndExpandBusinessCentralDVD -Version 13 -CumulativeUpdate CU14 -Language W1 -DownloadDirectory "C:\Install\"
 ```
 
 If you're calling it with the `-Verbose` switch you'll receive detailed output
