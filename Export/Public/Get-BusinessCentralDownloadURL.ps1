@@ -7,6 +7,7 @@ function Get-BusinessCentralDownloadURL {
         [string]
         $Language
     )
+    Add-Type -AssemblyName System.Web
     Function Get-GoogleSearchResult {
         <#
         .SYNOPSIS
@@ -103,7 +104,7 @@ function Get-BusinessCentralDownloadURL {
             Write-Verbose "==========================================="
             Write-Verbose "Searching Google with URI: $SearchUri"
             Write-Verbose "======= START WebRequest"
-            $webResponse = Invoke-WebRequest $SearchUri -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
+            $webResponse = Invoke-WebRequest $SearchUri -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -UseBasicParsing
             Write-Verbose "======= END WebRequest"
             Write-Verbose "Grabbing first search result..."
             $linkObject = $webResponse.Links | Where-Object { $_.outerHTML -match 'https://www.microsoft.com/en-us/download/details.aspx' } | Select-Object -First 1

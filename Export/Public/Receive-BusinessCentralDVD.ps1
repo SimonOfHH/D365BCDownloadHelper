@@ -21,7 +21,7 @@ function Receive-BusinessCentralDVD {
         $DownloadDirectory = "C:\Install\"
     )
     process {
-        $DownloadDirectory = $DownloadDirectory        
+        Add-Type -AssemblyName System.Web
 
         $UrlToDownload = Get-BusinessCentralDownloadURL -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language
         if (-not($UrlToDownload)){
@@ -45,37 +45,7 @@ function Receive-BusinessCentralDVD {
         else { 
             Write-Verbose "File $dvdFilename already exists."
         }
-        $dvdFilename
-        <#
-        # Unzip downloaded file
-                
-        $dvdPath = Join-Path $DownloadDirectory "DVD"
-        if (-not (Test-Path (Join-Path $dvdPath 'setup.exe'))) {
-            Write-CustomHost -Message "Unzipping $dvdFilename"
-            Expand-Archive -Path $dvdFilename -DestinationPath $dvdPath
-            Write-CustomHost -Message "Unzip complete"
-            if (-not (Test-Path (Join-Path $dvdPath 'setup.exe'))) {
-                # Get DVD-Zip from just extracted dir
-                $dvdZipfile = Get-ChildItem -Path $dvdPath -Filter *.zip | Select-Object -First 1 | % { $_.FullName }
-
-                # Move extracted ZIP to parent and delete remaining directory
-                Write-CustomHost -Message "Cleaning up directory..."
-                Move-Item $dvdZipfile $DownloadDirectory
-                Remove-Item $dvdPath -Confirm:$false -Force -Recurse
-
-                # Find moved file and Unzip it
-                $dvdZipfile = Get-ChildItem -Path $DownloadDirectory -Filter *.zip | Where-Object { $_.Name -ne $filename } | Select-Object -First 1 | % { $_.FullName }
-
-                Write-CustomHost -Message "Unzipping $dvdZipfile"
-                Expand-Archive -Path $dvdZipfile -DestinationPath $dvdPath
-                Write-CustomHost -Message "Unzip complete"
-
-                # Remove previously extracted ZIP (from other ZIP)
-                $dvdZipfile = Get-ChildItem -Path $DownloadDirectory -Filter *.DVD.zip | Where-Object { $_.Name -ne $filename } | Select-Object -First 1 | % { $_.FullName }
-                Remove-Item $dvdZipfile -Confirm:$false -Force -Recurse
-            }
-        }
-        #>
+        $dvdFilename        
     }
 }
 Export-ModuleMember Receive-BusinessCentralDVD
