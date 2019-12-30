@@ -42,14 +42,18 @@ function Get-BusinessCentralDownloadURL {
             Write-Verbose "           $CumulativeUpdate"
             Write-Verbose "           $Language"
             $VersionPhrase = ""
+            # MS is a littlge bit weird, with the naming under https://www.microsoft.com/en-us/download/
+            # e.g. https://www.microsoft.com/en-us/download/details.aspx?id=58318; sometimes it's "Business Central", sometimes it's "BC"
+            # or it's "2019" the one time and another time it's "19"
+            # so let's try different variants
             switch ($Version) {
                 "13" { $VersionPhrase = "Dynamics 365 Business Central" }
                 "14" { 
-                    $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise"
-                    if ($CumulativeUpdate -ne "CU01") {
-                        $VersionPhrase = "Dynamics 365 BC Spring 19 Update On Premise"
-                    }
-                }        
+                    $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise"                    
+                }
+                "15" {
+                    $VersionPhrase = "Update 15.x for Microsoft Dynamics 365 Business Central 2019 Release Wave 2"
+                }
             }
             if ($TryNo -eq 2) {
                 Write-Verbose "Second try; switching out phrase"
@@ -60,15 +64,29 @@ function Get-BusinessCentralDownloadURL {
                     $VersionPhrase = $VersionPhrase.Replace("Business Central", "BC")
                 }
             }
-            
+            if ($TryNo -eq 3) {
+                Write-Verbose "Third try; switching out phrase"
+                if ($VersionPhrase.Contains("2019")) {
+                    $VersionPhrase = $VersionPhrase.Replace("2019", "19")
+                }
+                else {
+                    $VersionPhrase = $VersionPhrase.Replace("19", "2019")
+                }
+            }
             Write-Verbose "Using Phrase instead of Version"
             Write-Verbose "           Version: $Version"
             Write-Verbose "           Phrase: $VersionPhrase"
-            $CumulativeUpdate = $CumulativeUpdate.Replace("CU", "")
+            $CumulativeUpdate = $CumulativeUpdate.Replace("CU", "")            
             if ($CumulativeUpdate.Length -eq 1) {
                 $CumulativeUpdate = "0" + $CumulativeUpdate
+            }            
+            $CumulativeUpdateInt = [int] $CumulativeUpdate
+            if ($Version -eq "15") {
+                $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")).zip site:microsoft.com"
             }
-            $searchString = "CU $CumulativeUpdate $VersionPhrase.zip site:microsoft.com"
+            else {
+                $searchString = "CU $CumulativeUpdate $VersionPhrase.zip site:microsoft.com"
+            }
             Write-Verbose "Generated Search String is:"
             Write-Verbose "           $searchString"
             Write-Verbose "==========================================="
@@ -122,6 +140,14 @@ function Get-BusinessCentralDownloadURL {
             Write-Verbose "==========================================="
             $targetLink
         }
+        $try = 0
+        while ((-not($firstResultLink)) -and ($try -lt 5)) {
+            $try += 1
+            $searchString = Get-SearchString -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language -TryNo $try
+            $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
+            $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
+        }
+        <#
         $searchString = Get-SearchString -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language -TryNo 1
         $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
         $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
@@ -130,6 +156,7 @@ function Get-BusinessCentralDownloadURL {
             $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
             $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
         }
+        #>
         $firstResultLink
     }
     function Get-ActualDownloadLinkForPortalPage {
