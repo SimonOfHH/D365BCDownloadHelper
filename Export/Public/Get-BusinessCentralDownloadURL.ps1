@@ -1,6 +1,7 @@
 function Get-BusinessCentralDownloadURL {
     [CmdletBinding()]
-    param (                
+    param (
+        [ValidateSet('8','9','10','11','13','14','15','2015','2016','2017','2018')]
         $Version,
         [string]
         $CumulativeUpdate,
@@ -46,22 +47,25 @@ function Get-BusinessCentralDownloadURL {
             # e.g. https://www.microsoft.com/en-us/download/details.aspx?id=58318; sometimes it's "Business Central", sometimes it's "BC"
             # or it's "2019" the one time and another time it's "19"
             # so let's try different variants
-            switch ($Version) {
+            switch ($Version) {                
+                {"2015", "8" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2015" }
+                {"2016", "9" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2016" }
+                {"2017", "10" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2017" }
+                {"2018", "11" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2018" }
+
                 "13" { $VersionPhrase = "Dynamics 365 Business Central" }
-                "14" { 
-                    $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise"                    
-                }
-                "15" {
-                    $VersionPhrase = "Update 15.x for Microsoft Dynamics 365 Business Central 2019 Release Wave 2"
-                }
+                "14" { $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise" }
+                "15" { $VersionPhrase = "Update 15.x for Microsoft Dynamics 365 Business Central 2019 Release Wave 2" }
             }
             if ($TryNo -eq 2) {
                 Write-Verbose "Second try; switching out phrase"
-                if ($VersionPhrase.Contains("BC")) {
-                    $VersionPhrase = $VersionPhrase.Replace("BC", "Business Central")
-                }
-                else {
-                    $VersionPhrase = $VersionPhrase.Replace("Business Central", "BC")
+                if (-not($VersionPhrase.Contains("Dynamics NAV"))) {
+                    if ($VersionPhrase.Contains("BC")) {
+                        $VersionPhrase = $VersionPhrase.Replace("BC", "Business Central")
+                    }
+                    else {
+                        $VersionPhrase = $VersionPhrase.Replace("Business Central", "BC")
+                    }
                 }
             }
             if ($TryNo -eq 3) {
@@ -82,10 +86,10 @@ function Get-BusinessCentralDownloadURL {
             }            
             $CumulativeUpdateInt = [int] $CumulativeUpdate
             if ($Version -eq "15") {
-                $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")).zip site:microsoft.com"
+                $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
             }
             else {
-                $searchString = "CU $CumulativeUpdate $VersionPhrase.zip site:microsoft.com"
+                $searchString = "CU $CumulativeUpdate $VersionPhrase zip site:microsoft.com inurl:download"
             }
             Write-Verbose "Generated Search String is:"
             Write-Verbose "           $searchString"
