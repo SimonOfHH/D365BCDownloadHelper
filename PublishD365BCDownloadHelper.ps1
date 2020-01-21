@@ -15,7 +15,7 @@ $path = "C:\temp\D365BCDownloadHelper"
 if (Test-Path -Path $path) {
     Remove-Item -Path $path -Force -Recurse
 }
-Copy-Item -Path $PSScriptRoot -Destination "C:\temp" -Exclude @("settings.ps1", ".gitignore", "README.md", "PublishD365BCDownloadHelper.ps1") -Recurse
+Copy-Item -Path $PSScriptRoot -Destination "C:\temp" -Exclude @("settings.ps1", ".gitignore", "README.md", "PublishD365BCDownloadHelper.ps1","TestRunner.ps1") -Recurse
 Remove-Item -Path (Join-Path $path ".git") -Force -Recurse -ErrorAction SilentlyContinue
 #Remove-Item -Path (Join-Path $path "Tests") -Force -Recurse
 
