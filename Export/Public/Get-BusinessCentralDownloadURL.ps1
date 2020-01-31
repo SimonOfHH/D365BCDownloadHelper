@@ -1,7 +1,7 @@
 function Get-BusinessCentralDownloadURL {
     [CmdletBinding()]
     param (
-        [ValidateSet('8','9','10','11','13','14','15','2015','2016','2017','2018')]
+        [ValidateSet('8', '9', '10', '11', '13', '14', '15', '2015', '2016', '2017', '2018')]
         $Version,
         [string]
         $CumulativeUpdate,
@@ -48,10 +48,10 @@ function Get-BusinessCentralDownloadURL {
             # or it's "2019" the one time and another time it's "19"
             # so let's try different variants
             switch ($Version) {                
-                {"2015", "8" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2015" }
-                {"2016", "9" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2016" }
-                {"2017", "10" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2017" }
-                {"2018", "11" -contains $_} { $VersionPhrase = "Microsoft Dynamics NAV 2018" }
+                { "2015", "8" -contains $_ } { $VersionPhrase = "Microsoft Dynamics NAV 2015" }
+                { "2016", "9" -contains $_ } { $VersionPhrase = "Microsoft Dynamics NAV 2016" }
+                { "2017", "10" -contains $_ } { $VersionPhrase = "Microsoft Dynamics NAV 2017" }
+                { "2018", "11" -contains $_ } { $VersionPhrase = "Microsoft Dynamics NAV 2018" }
 
                 "13" { $VersionPhrase = "Dynamics 365 Business Central" }
                 "14" { $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise" }
@@ -80,16 +80,26 @@ function Get-BusinessCentralDownloadURL {
             Write-Verbose "Using Phrase instead of Version"
             Write-Verbose "           Version: $Version"
             Write-Verbose "           Phrase: $VersionPhrase"
-            $CumulativeUpdate = $CumulativeUpdate.Replace("CU", "")            
-            if ($CumulativeUpdate.Length -eq 1) {
-                $CumulativeUpdate = "0" + $CumulativeUpdate
-            }            
-            $CumulativeUpdateInt = [int] $CumulativeUpdate
-            if ($Version -eq "15") {
-                $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
-            }
-            else {
-                $searchString = "CU $CumulativeUpdate $VersionPhrase zip site:microsoft.com inurl:download"
+            if ($CumulativeUpdate -ne "RTM") {
+                $CumulativeUpdate = $CumulativeUpdate.Replace("CU", "")            
+                if ($CumulativeUpdate.Length -eq 1) {
+                    $CumulativeUpdate = "0" + $CumulativeUpdate
+                }            
+                $CumulativeUpdateInt = [int] $CumulativeUpdate
+                if ($Version -eq "15") {
+                    $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
+                }
+                else {
+                    $searchString = "CU $CumulativeUpdate $VersionPhrase zip site:microsoft.com inurl:download"
+                }
+            } else {
+                $CumulativeUpdateInt = 1
+                if ($Version -eq "15") {
+                    $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
+                }
+                else {
+                    $searchString = "$VersionPhrase zip site:microsoft.com inurl:download -Cumulative"
+                }
             }
             Write-Verbose "Generated Search String is:"
             Write-Verbose "           $searchString"
@@ -129,7 +139,7 @@ function Get-BusinessCentralDownloadURL {
             $webResponse = Invoke-WebRequest $SearchUri -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -UseBasicParsing
             Write-Verbose "======= END WebRequest"
             Write-Verbose "Grabbing first search result..."
-            $linkObject = $webResponse.Links | Where-Object { $_.outerHTML -match 'https://www.microsoft.com/en-us/download/details.aspx' } | Select-Object -First 1
+            $linkObject = $webResponse.Links | Where-Object { $_.outerHTML -match 'http.*://www.microsoft.com/.*/download/details.aspx' } | Select-Object -First 1
             $targetLink = $linkObject.outerHTML
             if (-not($targetLink)) {
                 Write-Verbose "Couldn't find a result. Exiting."
