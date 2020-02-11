@@ -187,7 +187,7 @@ function Get-BusinessCentralDownloadURL {
         Write-Verbose "======= END WebRequest"
         $searchPattern = "$LanguageCode.*\.zip"
         Write-Verbose "Searching result for download Link using pattern: $searchPattern..."
-        $downloadLinkObject = $webResponse.Links | Where-Object { $_.href -match "$searchPattern" } | Select-Object -First 1
+        $downloadLinkObject = $webResponse.Links | Where-Object { $_.href -cmatch "$searchPattern" } | Select-Object -First 1
         Write-Verbose "Returning $($downloadLinkObject.href)"
         Write-Verbose "==========================================="
         $downloadLinkObject.href
