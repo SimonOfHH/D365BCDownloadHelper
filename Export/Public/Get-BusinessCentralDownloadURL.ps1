@@ -88,7 +88,7 @@ function Get-BusinessCentralDownloadURL {
                     $CumulativeUpdate = "0" + $CumulativeUpdate
                 }            
                 $CumulativeUpdateInt = [int] $CumulativeUpdate
-                if ($Version -eq "15") {
+                if (($Version -eq "15") -or (($Version -eq "16"))) {
                     $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
                 }
                 else {
@@ -96,7 +96,7 @@ function Get-BusinessCentralDownloadURL {
                 }
             } else {
                 $CumulativeUpdateInt = 1
-                if ($Version -eq "15") {
+                if (($Version -eq "15") -or (($Version -eq "16"))) {
                     $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
                 }
                 else {
