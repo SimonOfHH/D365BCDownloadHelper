@@ -1,7 +1,7 @@
 function Get-BusinessCentralDownloadURL {
     [CmdletBinding()]
     param (
-        [ValidateSet('8', '9', '10', '11', '13', '14', '15', '2015', '2016', '2017', '2018')]
+        [ValidateSet('8', '9', '10', '11', '13', '14', '15', '16', '2015', '2016', '2017', '2018')]
         $Version,
         [string]
         $CumulativeUpdate,
@@ -56,6 +56,8 @@ function Get-BusinessCentralDownloadURL {
                 "13" { $VersionPhrase = "Dynamics 365 Business Central" }
                 "14" { $VersionPhrase = "Dynamics 365 BC Spring 2019 Update On Premise" }
                 "15" { $VersionPhrase = "Update 15.x for Microsoft Dynamics 365 Business Central 2019 Release Wave 2" }
+                "16" { $VersionPhrase = "Update 16.x for Microsoft Dynamics 365 Business Central 2020 Release Wave 1" }
+                "17" { $VersionPhrase = "Update 17.x for Microsoft Dynamics 365 Business Central 2020 Release Wave 2" }
             }
             if ($TryNo -eq 2) {
                 Write-Verbose "Second try; switching out phrase"
