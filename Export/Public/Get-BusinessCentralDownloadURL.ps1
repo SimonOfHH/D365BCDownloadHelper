@@ -137,8 +137,8 @@ function Get-BusinessCentralDownloadURL {
             #$searchUri = Get-GoogleSearchUrl $SearchString
             Write-Verbose "==========================================="
             Write-Verbose "Searching Google with URI: $SearchUri"
-            Write-Verbose "======= START WebRequest"
-            $webResponse = Invoke-WebRequest $SearchUri -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -UseBasicParsing
+            Write-Verbose "======= START WebRequest"            
+            $webResponse = Invoke-WebRequest $SearchUri -UserAgent "($([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome))" -UseBasicParsing
             Write-Verbose "======= END WebRequest"
             Write-Verbose "Grabbing first search result..."
             $linkObject = $webResponse.Links | Where-Object { $_.outerHTML -match 'http.*://www.microsoft.com/.*/download/details.aspx' } | Select-Object -First 1
@@ -185,7 +185,7 @@ function Get-BusinessCentralDownloadURL {
         $confirmationLink = $PortalPageUri.Replace("details.aspx", "confirmation.aspx")
         Write-Verbose "Confirmation Link is: $confirmationLink"
         Write-Verbose "======= START WebRequest"
-        $webResponse = Invoke-WebRequest $confirmationLink -UseBasicParsing -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
+        $webResponse = Invoke-WebRequest $confirmationLink -UseBasicParsing -UserAgent "($([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome))"
         Write-Verbose "======= END WebRequest"
         $searchPattern = "$LanguageCode.*\.zip"
         Write-Verbose "Searching result for download Link using pattern: $searchPattern..."
