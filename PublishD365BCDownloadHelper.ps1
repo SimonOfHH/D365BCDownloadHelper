@@ -17,7 +17,7 @@ if (Test-Path -Path $path) {
 }
 Copy-Item -Path $PSScriptRoot -Destination "C:\temp" -Exclude @("settings.ps1", ".gitignore", "README.md", "PublishD365BCDownloadHelper.ps1","TestRunner.ps1") -Recurse
 Remove-Item -Path (Join-Path $path ".git") -Force -Recurse -ErrorAction SilentlyContinue
-#Remove-Item -Path (Join-Path $path "Tests") -Force -Recurse
+Remove-Item -Path (Join-Path $path "Private") -Force -Recurse
 
 $modulePath = Join-Path $path "D365BCDownloadHelper.psm1"
 Import-Module $modulePath -DisableNameChecking

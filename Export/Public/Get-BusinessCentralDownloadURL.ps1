@@ -1,7 +1,7 @@
 function Get-BusinessCentralDownloadURL {
     [CmdletBinding()]
     param (
-        [ValidateSet('8', '9', '10', '11', '13', '14', '15', '16', '2015', '2016', '2017', '2018')]
+        [ValidateSet('8', '9', '10', '11', '13', '14', '15', '16', '17', '18', '2015', '2016', '2017', '2018')]
         $Version,
         [string]
         $CumulativeUpdate,
@@ -58,6 +58,7 @@ function Get-BusinessCentralDownloadURL {
                 "15" { $VersionPhrase = "Update 15.x for Microsoft Dynamics 365 Business Central 2019 Release Wave 2" }
                 "16" { $VersionPhrase = "Update 16.x for Microsoft Dynamics 365 Business Central 2020 Release Wave 1" }
                 "17" { $VersionPhrase = "Update 17.x for Microsoft Dynamics 365 Business Central 2020 Release Wave 2" }
+                "18" { $VersionPhrase = "Update 18.x for Microsoft Dynamics 365 Business Central 2021 Release Wave 1" }
             }
             if ($TryNo -eq 2) {
                 Write-Verbose "Second try; switching out phrase"
@@ -88,7 +89,7 @@ function Get-BusinessCentralDownloadURL {
                     $CumulativeUpdate = "0" + $CumulativeUpdate
                 }            
                 $CumulativeUpdateInt = [int] $CumulativeUpdate
-                if (($Version -eq "15") -or (($Version -eq "16"))) {
+                if (($Version -eq "15") -or ($Version -eq "16") -or ($Version.ToString() -eq "17") -or ($Version -eq "18")) {
                     $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
                 }
                 else {
@@ -96,7 +97,7 @@ function Get-BusinessCentralDownloadURL {
                 }
             } else {
                 $CumulativeUpdateInt = 1
-                if (($Version -eq "15") -or (($Version -eq "16"))) {
+                if (($Version -eq "15") -or ($Version -eq "16") -or ($Version -eq "17") -or ($Version -eq "18")) {
                     $searchString = "$($VersionPhrase.Replace(".x",".$($CumulativeUpdateInt)")) zip site:microsoft.com inurl:download"
                 }
                 else {
@@ -132,14 +133,16 @@ function Get-BusinessCentralDownloadURL {
         function Get-LinkForFirstGoogleSearchResult {
             [CmdletBinding()]
             param (                
-                $SearchUri
+                $SearchUri,
+                $ConsentSession
             )
             #$searchUri = Get-GoogleSearchUrl $SearchString
             Write-Verbose "==========================================="
             Write-Verbose "Searching Google with URI: $SearchUri"
             Write-Verbose "======= START WebRequest"            
-            $webResponse = Invoke-WebRequest $SearchUri -UserAgent "($([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome))" -UseBasicParsing
-            Write-Verbose "======= END WebRequest"
+                        
+            $webResponse = Invoke-WebRequest $SearchUri -UserAgent "($([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome))" -UseBasicParsing -WebSession $ConsentSession
+            Write-Verbose "======= END WebRequest"            
             Write-Verbose "Grabbing first search result..."
             $linkObject = $webResponse.Links | Where-Object { $_.outerHTML -match 'http.*://www.microsoft.com/.*/download/details.aspx' } | Select-Object -First 1
             $targetLink = $linkObject.outerHTML
@@ -161,18 +164,11 @@ function Get-BusinessCentralDownloadURL {
             $try += 1
             $searchString = Get-SearchString -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language -TryNo $try
             $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
-            $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
+            if (-not($consentSession)){
+                $consentSession = Get-GoogleCookieConsentSession -SearchUrl $searchUri
+            }
+            $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri -ConsentSession $consentSession
         }
-        <#
-        $searchString = Get-SearchString -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language -TryNo 1
-        $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
-        $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
-        if (-not($firstResultLink)) {
-            $searchString = Get-SearchString -Version $Version -CumulativeUpdate $CumulativeUpdate -Language $Language -TryNo 2
-            $searchUri = Get-UriWthEncodedSearchQuery -QueryString $SearchString
-            $firstResultLink = Get-LinkForFirstGoogleSearchResult -SearchUri $searchUri
-        }
-        #>
         $firstResultLink
     }
     function Get-ActualDownloadLinkForPortalPage {
